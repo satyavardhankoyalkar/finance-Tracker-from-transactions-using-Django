@@ -1,0 +1,185 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Stats</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HoXa6wBRHj2BQGM90JFA7aN+4dYEmvn2VSFhOnJ9yzcEvDT8SRMxvlLVRnSI8R8Z" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="{% static 'transactions/css/stats.css' %}">
+    <script src="{% static 'transactions/js/script.js' %}" defer></script>
+    <script src="{% static 'transactions/js/transaction_list.js' %}" defer></script>
+
+    <style>
+        /* Collapse navbar on screens smaller than 576px */
+        .navbar-collapse {
+            display: none;
+        }
+
+        /* Expand navbar on screens 576px and larger */
+        @media (min-width: 320px) {
+            .navbar-collapse {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a id="op" class="navbar-brand" href="{% url 'transaction_list' %}">Transaction List</a>
+            
+            <div id="io7" class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a id="o8" class="nav-link" href="{% url 'add_transaction' %}">Create Transaction</a>
+                    </li>
+                    <li id="i0" class="nav-item">
+                        <a id="o9" href="{% url 'stats' %}">Stats</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <h1>Transaction Stats 
+        <button id="downloadReport" style="background: #007bff;">
+            <a href="{% url 'download_report' %}" style="text-decoration: none; background: #007bff; color: white;">Download Report</a>
+        </button>
+    </h1>
+
+    <!-- Container to hold both charts -->
+    <div class="charts-container">
+        <!-- Chart 1: Category-wise Spending -->
+        <div class="chart" id="categoryChartContainer">
+            <h2>Category-wise Spending</h2>
+            <canvas id="categoryChart" width="400" height="200"></canvas>
+
+            <script>
+                var categories = {{ categories|safe }};
+                var values = {{ values|safe }};
+                
+                var ctx = document.getElementById('categoryChart').getContext('2d');
+                var categoryChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            label: 'Spending by Category',
+                            data: values,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        return tooltipItem.label + ': ' + tooltipItem.raw;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <!-- Chart 2: Monthly Spending -->
+        <div class="chart" id="monthlyChartContainer">
+            <h2>Monthly Spending</h2>
+            <canvas id="monthlyChart" width="400" height="200"></canvas>
+            
+            <script>
+                var months = {{ months|safe }};
+                var spendingValues = {{ spending_values|safe }};
+                
+                var ctx = document.getElementById('monthlyChart').getContext('2d');
+                var monthlyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Monthly Spending',
+                            data: spendingValues,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadReport').addEventListener('click', function() {
+            console.log('Download Report button clicked');  // Debugging
+            // Create a new jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title to the PDF
+            doc.setFontSize(16);
+            doc.text('Transaction Report', 14, 20);
+
+            // Add first chart (Category-wise Spending)
+            html2canvas(document.getElementById('categoryChartContainer')).then(function(canvas) {
+                console.log('Captured category chart');  // Debugging
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 14, 30, 180, 100);
+                
+                // Add second chart (Monthly Spending)
+                html2canvas(document.getElementById('monthlyChartContainer')).then(function(canvas) {
+                    console.log('Captured monthly chart');  // Debugging
+                    const imgData2 = canvas.toDataURL('image/png');
+                    doc.addImage(imgData2, 'PNG', 14, 140, 180, 100);
+
+                    // Save the PDF
+                    doc.save('transaction_report.pdf');
+                }).catch(function(error) {
+                    console.error('Error capturing the second chart:', error);  // Debugging
+                });
+            }).catch(function(error) {
+                console.error('Error capturing the first chart:', error);  // Debugging
+            });
+        });
+    </script>
+
+</body>
+</html>

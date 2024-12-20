@@ -1,0 +1,106 @@
+/* Container for the charts */
+.charts-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;  /* Adjusts space between the two charts */
+    flex-wrap: wrap;  /* Allows wrapping if the container is too small */
+    margin: 20px 0;
+}
+
+/* Individual chart box */
+.chart {
+    flex: 1 1 45%;  /* Makes each chart take up about 45% of the container width */
+    box-sizing: border-box;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for headings */
+h1, h2 {
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+/* Ensure canvas elements are responsive and fit within their containers */
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Links styling */
+#r, #downloadReport {
+    text-decoration: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Mobile Responsiveness */
+@media only screen and (max-width: 600px) {
+    .charts-container {
+        flex-direction: column; /* Stacks charts vertically on smaller screens */
+        align-items: center;
+        gap: 10px; /* Reduced gap between charts on smaller screens */
+    }
+
+    .chart {
+        flex: 1 1 90%; /* Make each chart take up more space on small screens */
+        width: 100%; /* Ensure the chart box takes up full width */
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 1.3rem; /* Slightly smaller font size for smaller screens */
+    }
+}
+
+/* Tablet Responsiveness (For screens between 600px to 900px) */
+@media only screen and (max-width: 900px) {
+    .charts-container {
+        flex-direction: column; /* Stack charts vertically on tablets */
+        align-items: center;
+    }
+
+    .chart {
+        flex: 1 1 90%; /* Ensure each chart takes up more space */
+        width: 100%;
+        padding: 18px;
+    }
+
+    h2 {
+        font-size: 1.4rem; /* Adjust font size for tablets */
+    }
+}
+a {
+    color: red;
+    text-decoration: none;
+    margin: 0 10px;
+}
+#i0 {
+    padding-top: 8px;
+}
+#i2 {
+    text-decoration: none;
+    color: red;
+}
+#op {
+    color: red;
+}
+#transactionList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#transactionList li {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+}

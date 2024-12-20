@@ -1,0 +1,125 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction List</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'transactions/css/transaction_list.css' %}">
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'transactions/js/transaction_list.js' %}" defer></script>
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-background">
+        <iframe 
+            src="https://www.youtube.com/embed/vn3AXOMKqfU?autoplay=1&controls=0&mute=1&loop=1&playlist=vn3AXOMKqfU&vq=hd1080" 
+            frameborder="0" 
+            allow="autoplay; encrypted-media" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'transaction_list' %}">Transaction List</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add_transaction' %}">Create Transaction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'stats' %}">Stats</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content container mt-5">
+        <h1 class="text-white">Transaction List</h1>
+
+        <!-- Category Filter -->
+        <label for="categoryFilter" class="form-label text-white">Filter by Category:</label>
+        <select id="categoryFilter" class="form-select mb-4">
+            <option value="all">All</option>
+            {% for category in category_totals.keys %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Transaction List -->
+        <ul id="transactionList" class="list-group">
+            {% for transaction in page_obj %}
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-category="{{ transaction.category }}">
+                    <span>
+                        <strong>{{ transaction.category }}</strong> - ₹{{ transaction.amount }} on {{ transaction.date }}: {{ transaction.description }}
+                    </span>
+                    <a class="btn btn-danger btn-sm" href="{% url 'delete_transaction' transaction.pk %}" onclick="return confirm('Are you sure you want to delete this transaction?')">Delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Download Options -->
+        <div class="dropdown mt-4">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                Download List
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="{% url 'download_csv' %}">Download CSV</a></li>
+                <li><a class="dropdown-item" href="{% url 'download_pdf' %}">Download PDF</a></li>
+            </ul>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination mt-4 d-flex justify-content-center">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn btn-outline-primary btn-sm">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary btn-sm">Previous</a>
+                {% endif %}
+
+                <span class="current text-white mx-2">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary btn-sm">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">Last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Category Filter Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const transactionListItems = document.querySelectorAll('#transactionList li');
+
+            categoryFilter?.addEventListener('change', function () {
+                const selectedCategory = this.value;
+                transactionListItems.forEach(transaction => {
+                    const transactionCategory = transaction.getAttribute('data-category');
+                    transaction.style.display = selectedCategory === 'all' || transactionCategory === selectedCategory
+                        ? 'list-item'
+                        : 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
