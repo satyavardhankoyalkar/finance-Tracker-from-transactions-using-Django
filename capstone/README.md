@@ -1,4 +1,4 @@
-README.md
+
 Personal Finance Tracker
 Distinctiveness and Complexity
 This project is a Personal Finance Tracker, a web application designed to help users manage and track their personal finances, specifically focusing on transactions, budgeting, and spending analysis. This application goes beyond simple transaction logging by integrating advanced features such as dynamic statistics visualization with interactive charts and transaction reports that can be downloaded in PDF or CSV formats. The complexity lies in the backend setup with Django, involving data modeling for transactions, user accounts, and reporting functionalities. The frontend integrates JavaScript (with Chart.js and HTML2Canvas) to provide a seamless and engaging user experience, ensuring that the project is mobile-responsive.
